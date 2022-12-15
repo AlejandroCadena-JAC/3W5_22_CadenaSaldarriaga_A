@@ -1,0 +1,4 @@
+station decision: dropdown menu for departure and arrival stations //done
+Time decision: scroll wheels for time and hour, date not taken into account // todo
+graph of stations to be travelled in the decision (start and end station) // todo
+time in between station segment time math taken from the API // todo
