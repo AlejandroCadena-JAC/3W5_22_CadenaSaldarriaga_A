@@ -22,15 +22,19 @@ const createOptions = async () =>
     for(option of options)
     {
         const newStationOption = document.createElement("option");
+        const newEndStationOption = document.createElement("option");
         console.log(option);
 
         newStationOption.value = option.StationId;
         newStationOption.text = option.Name;
-
+        newEndStationOption.value = option.StationId;
+        newEndStationOption.text = option.Name;
         
         getStartStations.appendChild(newStationOption); 
-        getEndStations.appendChild(newStationOption);
+        getEndStations.appendChild(newEndStationOption);
     }
+
+   
 };
 
 createOptions();
