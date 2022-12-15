@@ -41,16 +41,21 @@ createOptions();
 
 // getting the beginning and end stations to create the path and calculate time
 
-async function getStartAndEndStation()
+ function getStartAndEndStation()
 {
-    try
-    {
-        
-    }    
-    catch
-    {
+    var start = document.getElementById('beginSt');
+    var end = document.getElementById('endSt');
 
-    }    
+    var startValue = start.options[start.selectedIndex].value;
+
+    var endValue = end.options[end.selectedIndex].value;
+
+    console.log(startValue);
+    console.log(endValue);
     
 
 }
+
+var bttn = document.getElementById('print');
+
+bttn.addEventListener("click",  getStartAndEndStation);
