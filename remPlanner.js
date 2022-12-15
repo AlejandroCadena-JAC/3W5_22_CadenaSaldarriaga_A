@@ -85,7 +85,17 @@ async function getStartAndEndStation()
 
             let timeToTravel = totalDist / totalSpeed;
 
-            console.log(timeToTravel);
+            let currentStation = " http://10.101.0.12:8080/schedule/" + encodeURIComponent(newStationName);
+
+           let currentStationSchedule = await getInfo(currentStation);
+            userTime = document.getElementById('departure');
+            let departureTime = userTime.value;
+
+            console.log(departureTime);
+          /* for (nextTrain in currentStationSchedule)
+           {
+                if(departureTime )
+           }*/
         }
    }
 }
