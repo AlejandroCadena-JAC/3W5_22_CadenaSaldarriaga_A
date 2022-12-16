@@ -49,6 +49,7 @@ createOptions();
 };
 
 
+
 async function getStartAndEndStation()
 {
     var start = document.getElementById('beginSt');
@@ -83,7 +84,7 @@ async function getStartAndEndStation()
             
             let totalSpeed = speedo[0].AverageSpeed;
 
-            let timeToTravel = totalDist / totalSpeed;
+            let timeToTravel = (totalDist / totalSpeed) * 60;
 
             let currentStation = " http://10.101.0.12:8080/schedule/" + encodeURIComponent(newStationName);
 
@@ -91,11 +92,39 @@ async function getStartAndEndStation()
             userTime = document.getElementById('departure');
             let departureTime = userTime.value;
 
-            console.log(departureTime);
-          /* for (nextTrain in currentStationSchedule)
+            counter = 0;
+           for (nextTrain in currentStationSchedule)
            {
-                if(departureTime )
-           }*/
+               if(nextTrain.SegmentId === currentSegmentId)
+               {
+                    let date = new Date();
+
+                    timeArray = currentStationSchedule[nextTrain].Time.split('T');
+                    
+                    time = timeArray[1].substring(0,timeArray[1].length - 8);
+
+                    hoursMins = time.split(':')
+
+                    date.setHours(hoursMins[0]);
+                    date.setMinutes(hoursMins[1]);
+
+                    let nextDeparture = date.getHours() + ":" + date.getMinutes();
+
+                    departureArray = departureTime.split(':');
+
+                    arrivalTime = new Date();
+
+                    arrivalTime.setHours(departureArray[0]);
+
+                    arrivalTime.setMinutes(departureArray[1] + timeToTravel);
+
+                    if(arrivalTime.getHours() <= date.getHours() && arrivalTime.getMinutes() <= date.getMinutes() && counter === 0)
+                    {
+                        counter++;
+                        createTable(newStationName);
+                    }
+               }
+           }
         }
    }
 }
@@ -104,5 +133,20 @@ var bttn = document.getElementById('print');
 
 bttn.addEventListener("click",  getStartAndEndStation);
 
+function createTable(station)
+{
+    tableId = document.getElementById('pathTable');
 
+    var row = document.createElement("TR");
+    row.setAttribute("id", "row");
+
+    tableId.appendChild(row);
+
+    var cell = document.createElement("TD");
+    var data = document.createTextNode(station);
+
+    cell.appendChild(data);
+
+    tableId.appendChild(cell);
+}
 

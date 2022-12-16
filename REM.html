@@ -1,5 +1,10 @@
 <!DOCTYPE html>
 <html>
+    <style>
+        table, th, td {
+          border:1px solid black;
+        }
+        </style>
     <script src="./remPlanner.js" defer></script>
     <body>
         <h1>Welcome to scuffed REM app</h1>
@@ -15,11 +20,7 @@
             
         </div>
 
-        <div>
-            <p>
-                <!--TODO put station menus beside each other-->
-            </p>
-        </div>
+        <br>
         
         <div class="endMenu">
             <label for="endStation">Arrival Station</label>
@@ -30,12 +31,27 @@
             
         </div>
 
+        <br>
+
         <div>
             <label for="departure">Choose when you want to depart</label>
             <input type="time" id="departure">
         </div>
+        <br>
         <div>
             <button id="print">print stations</button>
+        </div>
+
+        <br>
+
+        <div>
+            <table id="pathTable">
+                <tr>
+                    <th>Station</th>
+                    <th>Arrival Time</th>
+                </tr>
+                
+            </table>
         </div>
     </body>
 </html>
