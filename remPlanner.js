@@ -10,7 +10,7 @@ const getStations = async () =>
    response = await fetch("http://10.101.0.12:8080/stations");
     console.log(response);
 
-    const stationData = response.json();
+    const stationData =  await response.json();
 
     return stationData;
 };
@@ -43,7 +43,7 @@ createOptions();
 
  async function getInfo(path){
     response = await fetch(path);
-    const pathData = response.json()
+    const pathData = await response.json()
 
     return pathData;
 };
@@ -59,7 +59,7 @@ async function getStartAndEndStation()
 
     var endValue = end.options[end.selectedIndex].text;
 
-    let completePath = " http://10.101.0.12:8080/path/" + encodeURIComponent(startValue) + "/" + encodeURIComponent(endValue);
+    let completePath = "http://10.101.0.12:8080/path/" + encodeURIComponent(startValue) + "/" + encodeURIComponent(endValue);
     
    let pathData = await getInfo(completePath);
 
@@ -86,7 +86,7 @@ async function getStartAndEndStation()
 
             let timeToTravel = (totalDist / totalSpeed) * 60;
 
-            let currentStation = " http://10.101.0.12:8080/schedule/" + encodeURIComponent(newStationName);
+            let currentStation = "http://10.101.0.12:8080/schedule/" + encodeURIComponent(newStationName);
 
            let currentStationSchedule = await getInfo(currentStation);
             userTime = document.getElementById('departure');
@@ -121,7 +121,8 @@ async function getStartAndEndStation()
                     if(arrivalTime.getHours() <= date.getHours() && arrivalTime.getMinutes() <= date.getMinutes() && counter === 0)
                     {
                         counter++;
-                        createTable(newStationName);
+                        console.log(newStationName);
+                        console.log(nextDeparture);
                     }
                }
            }
@@ -133,7 +134,7 @@ var bttn = document.getElementById('print');
 
 bttn.addEventListener("click",  getStartAndEndStation);
 
-function createTable(station)
+async function createTable(station,time)
 {
     tableId = document.getElementById('pathTable');
 
@@ -143,10 +144,11 @@ function createTable(station)
     tableId.appendChild(row);
 
     var cell = document.createElement("TD");
+    var arrivalTime = document.createTextNode(time);
     var data = document.createTextNode(station);
 
     cell.appendChild(data);
-
+    cell.appendChild(arrivalTime);
     tableId.appendChild(cell);
 }
 
