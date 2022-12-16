@@ -7,7 +7,7 @@ const getEndStations = document.getElementById("endSt");
 
 const getStations = async () => 
 {
-   response = await fetch("http://10.101.0.12:8080/stations");
+    response = await fetch("http://10.101.0.12:8080/stations");
     console.log(response);
 
     const stationData =  await response.json();
@@ -40,8 +40,8 @@ const createOptions = async () =>
 createOptions();
 
 // getting the beginning and end stations to create the path and calculate time
-
- async function getInfo(path){
+async function getInfo(path)
+{
     response = await fetch(path);
     const pathData = await response.json()
 
@@ -61,7 +61,7 @@ async function getStartAndEndStation()
 
     let completePath = "http://10.101.0.12:8080/path/" + encodeURIComponent(startValue) + "/" + encodeURIComponent(endValue);
     
-   let pathData = await getInfo(completePath);
+    let pathData = await getInfo(completePath);
 
     let firstStationSegmentId = pathData[0].SegmentId;
 
@@ -72,6 +72,10 @@ async function getStartAndEndStation()
             let newStationName = pathData[segment].Name;
 
             let currentSegmentId = pathData[segment].SegmentId;
+
+            let newStationID = pathData[segment].StationId;
+
+            console.log(newStationID);
 
             // getting distance
 
@@ -86,46 +90,53 @@ async function getStartAndEndStation()
 
             let timeToTravel = (totalDist / totalSpeed) * 60;
 
-            let currentStation = "http://10.101.0.12:8080/schedule/" + encodeURIComponent(newStationName);
+            let currentStationSC = "http://10.101.0.12:8080/schedule/" + encodeURIComponent(newStationName);
 
-           let currentStationSchedule = await getInfo(currentStation);
+            let currentStationSchedule = await getInfo(currentStationSC);
             userTime = document.getElementById('departure');
             let departureTime = userTime.value;
 
             counter = 0;
-           for (nextTrain in currentStationSchedule)
-           {
-               if(nextTrain.SegmentId === currentSegmentId)
+            for (nextTrain in currentStationSchedule)
+            {
+                let nextStation = pathData[nextTrain];
+                console.log(nextStation.SegmentId);
+               if(nextStation.SegmentId === currentSegmentId && newStationID === nextStation.StationId)
                {
-                    let date = new Date();
-
-                    timeArray = currentStationSchedule[nextTrain].Time.split('T');
-                    
-                    time = timeArray[1].substring(0,timeArray[1].length - 8);
-
-                    hoursMins = time.split(':')
-
-                    date.setHours(hoursMins[0]);
-                    date.setMinutes(hoursMins[1]);
-
-                    let nextDeparture = date.getHours() + ":" + date.getMinutes();
-
-                    departureArray = departureTime.split(':');
-
-                    arrivalTime = new Date();
-
-                    arrivalTime.setHours(departureArray[0]);
-
-                    arrivalTime.setMinutes(departureArray[1] + timeToTravel);
-
-                    if(arrivalTime.getHours() <= date.getHours() && arrivalTime.getMinutes() <= date.getMinutes() && counter === 0)
+                    for (train in currentStationSchedule)
                     {
-                        counter++;
-                        console.log(newStationName);
-                        console.log(nextDeparture);
+                        let date = new Date();
+
+                        timeArray = currentStationSchedule[train].Time.split('T');
+                        
+                        time = timeArray[1].substring(0,timeArray[1].length - 8);
+
+                        hoursMins = time.split(':')
+
+                        date.setHours(hoursMins[0]);
+                        date.setMinutes(hoursMins[1]);
+
+                        let nextDeparture = date.getHours() + ":" + date.getMinutes();
+
+                        departureArray = departureTime.split(':');
+
+                        arrivalTime = new Date();
+
+                        arrivalTime.setHours(departureArray[0]);
+
+                        arrivalTime.setMinutes(departureArray[1] + timeToTravel);
+
+                        if(arrivalTime.getHours() <= date.getHours() && arrivalTime.getMinutes() <= date.getMinutes() && counter === 0)
+                        {
+                            counter++;
+                            console.log(newStationName);
+                            console.log(nextDeparture);
+                            break;
+                        }
                     }
+                    break // try this to reset the segment and path
                }
-           }
+            }
         }
    }
 }
