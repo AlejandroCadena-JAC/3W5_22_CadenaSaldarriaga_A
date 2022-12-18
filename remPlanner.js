@@ -23,7 +23,7 @@ const createOptions = async () =>
     {
         const newStationOption = document.createElement("option");
         const newEndStationOption = document.createElement("option");
-        console.log(option);
+        
 
         newStationOption.value = option.StationId;
         newStationOption.text = option.Name;
@@ -60,86 +60,101 @@ async function getStartAndEndStation()
     var endValue = end.options[end.selectedIndex].text;
 
     let completePath = "http://10.101.0.12:8080/path/" + encodeURIComponent(startValue) + "/" + encodeURIComponent(endValue);
-    
+
     let pathData = await getInfo(completePath);
 
+    console.log(pathData);
+    userTime = document.getElementById('departure');
+    let inputTime = userTime.value;
+
+    let departureTime = await getSchedule(pathData,pathData[0].Name,inputTime)
     let firstStationSegmentId = pathData[0].SegmentId;
 
-   for(segment in pathData)
+    let completeDeparture = await addStr(departureTime,2,":");
+    console.log(departureTime);
+    const initialDepartureTimeArray = completeDeparture.split(':');
+
+    let departureDate = new Date();
+
+    departureDate.setUTCHours(initialDepartureTimeArray[0]);
+    departureDate.setUTCMinutes(initialDepartureTimeArray[1]);
+
+    createTable(startValue,departureDate.getUTCHours() + ":" + departureDate.getUTCMinutes());
+
+    let previousArrivalTime = new Date()
+
+    previousArrivalTime.setUTCHours(departureDate.getUTCHours());
+    previousArrivalTime.setUTCMinutes(departureDate.getUTCMinutes());
+
+   for(let stationIndex= 0; stationIndex < pathData.length; stationIndex++)
    {
-        if(firstStationSegmentId != pathData[segment].SegmentId)
+        if(pathData[stationIndex].SegmentId != firstStationSegmentId || pathData[stationIndex].SegmentId != pathData[stationIndex].SegmentId)
         {
-            let newStationName = pathData[segment].Name;
+            nextStationName = pathData[stationIndex + 1].Name;
 
-            let currentSegmentId = pathData[segment].SegmentId;
+            currentStationName = pathData[stationIndex].Name;
 
-            let newStationID = pathData[segment].StationId;
-
-            console.log(newStationID);
-
-            // getting distance
-
-            let distancePath = "http://10.101.0.12:8080/distance/" + encodeURIComponent(startValue) + "/" + encodeURIComponent(newStationName);
-
+            let distancePath = "http://10.101.0.12:8080/distance/" + encodeURIComponent(currentStationName) + "/" + encodeURIComponent(nextStationName);
 
             let totalDist = await getInfo(distancePath); 
 
             let speedo = await getInfo("http://10.101.0.12:8080/averageTrainSpeed");
-            
+                
             let totalSpeed = speedo[0].AverageSpeed;
 
             let timeToTravel = (totalDist / totalSpeed) * 60;
 
-            let currentStationSC = "http://10.101.0.12:8080/schedule/" + encodeURIComponent(newStationName);
+            let UTCTimeTraveled = new Date();
 
-            let currentStationSchedule = await getInfo(currentStationSC);
-            userTime = document.getElementById('departure');
-            let departureTime = userTime.value;
+            UTCTimeTraveled.setUTCMinutes(timeToTravel);
 
-            counter = 0;
-            for (nextTrain in currentStationSchedule)
-            {
-                let nextStation = pathData[nextTrain];
-                console.log(nextStation.SegmentId);
-               if(nextStation.SegmentId === currentSegmentId && newStationID === nextStation.StationId)
-               {
-                    for (train in currentStationSchedule)
-                    {
-                        let date = new Date();
+            let currentStationArrivalTime = await GetArrival(UTCTimeTraveled,previousArrivalTime);
 
-                        timeArray = currentStationSchedule[train].Time.split('T');
-                        
-                        time = timeArray[1].substring(0,timeArray[1].length - 8);
+            previousArrivalTime = currentStationArrivalTime;
 
-                        hoursMins = time.split(':')
+            let currentStationArrivalTimeString = currentStationArrivalTime.getUTCHours() + ":" + currentStationArrivalTime.getUTCMinutes();
 
-                        date.setHours(hoursMins[0]);
-                        date.setMinutes(hoursMins[1]);
+            let departureFromSwitch = await getSchedule(pathData,currentStationName,currentStationArrivalTimeString);
 
-                        let nextDeparture = date.getHours() + ":" + date.getMinutes();
+            let newDepartureTime = await addStr(departureFromSwitch,2,":");
+            const newDepartureTimeArray = newDepartureTime.split(':');
 
-                        departureArray = departureTime.split(':');
+            let newDepartureDate = new Date();
+        
+            newDepartureDate.setUTCHours(newDepartureTimeArray[0]);
+            newDepartureDate.setUTCMinutes(newDepartureTimeArray[1]);
 
-                        arrivalTime = new Date();
-
-                        arrivalTime.setHours(departureArray[0]);
-
-                        arrivalTime.setMinutes(departureArray[1] + timeToTravel);
-
-                        if(arrivalTime.getHours() <= date.getHours() && arrivalTime.getMinutes() <= date.getMinutes() && counter === 0)
-                        {
-                            counter++;
-                            console.log(newStationName);
-                            console.log(nextDeparture);
-                            break;
-                        }
-                    }
-                    break // try this to reset the segment and path
-               }
-            }
+            createTable(nextStationName,newDepartureDate.getUTCHours() + ":" + newDepartureDate.getUTCMinutes());
         }
-   }
-}
+        else
+        {
+            
+            nextStationName = pathData[stationIndex + 1].Name;
+
+            currentStationName = pathData[stationIndex].Name;
+
+            let distancePath = "http://10.101.0.12:8080/distance/" + encodeURIComponent(currentStationName) + "/" + encodeURIComponent(nextStationName);
+
+            let totalDist = await getInfo(distancePath); 
+
+            let speedo = await getInfo("http://10.101.0.12:8080/averageTrainSpeed");
+                
+            let totalSpeed = speedo[0].AverageSpeed;
+
+            let timeToTravel = (totalDist / totalSpeed) * 60;
+
+            let UTCTimeTraveled = new Date();
+
+            UTCTimeTraveled.setUTCMinutes(timeToTravel);
+
+            let currentStationArrivalTime = await GetArrival(UTCTimeTraveled,previousArrivalTime);
+
+            previousArrivalTime = currentStationArrivalTime;
+
+            createTable(nextStationName,currentStationArrivalTime.getUTCHours() + ":" + currentStationArrivalTime.getUTCMinutes());
+        }
+   } 
+} 
 
 var bttn = document.getElementById('print');
 
@@ -155,11 +170,71 @@ async function createTable(station,time)
     tableId.appendChild(row);
 
     var cell = document.createElement("TD");
+    var cell2 = document.createElement("TD");
     var arrivalTime = document.createTextNode(time);
     var data = document.createTextNode(station);
 
     cell.appendChild(data);
-    cell.appendChild(arrivalTime);
+    cell2.appendChild(arrivalTime);
     tableId.appendChild(cell);
+    tableId.appendChild(cell2);
 }
+
+async function getSchedule(stations,newStationName, time,)
+{
+
+    let currentStationSC = "http://10.101.0.12:8080/schedule/" + encodeURIComponent(newStationName);
+
+    let schedulePromise = await getInfo(currentStationSC);
+
+    filteredSchedules = schedulePromise.filter(schedulePromise => schedulePromise.SegmentId === stations[0].SegmentId);
+
+    let advancedFilter = [];
+
+    let timeHolder = [];    
+    let splits = time.split(":");
+
+    timeHolder.push(splits[0] + splits[1]);
+
+    for(let dep =0; dep <filteredSchedules.length; dep++){
+
+        let time = filteredSchedules[dep].Time.split('T');
+        let splicedTime = time[1].substring(0,time[1].length - 8);
+        let splitTime = splicedTime.split(":")
+        advancedFilter.push(splitTime[0] + splitTime[1]);
+
+    }
+    console.log(time)
+    console.log(advancedFilter)
+    var completeSchedule = advancedFilter.filter(advancedFilter => timeHolder[0] <= advancedFilter);
+    console.log(completeSchedule);
+
+    var correct = completeSchedule.reduce(function(previous,current){
+        return (Math.abs(current - timeHolder[0]) < Math.abs(previous - timeHolder[0])? current: previous);
+    });
+  //  console.log(correct);
+    return correct;
+}
+
+function addStr(str, index, stringToAdd){
+    return str.substring(0, index) + stringToAdd + str.substring(index, str.length);
+  }
+
+
+
+async function GetArrival(timeToTravel,arrivalTime)
+{
+    let nextArrival = new Date();
+
+    nextArrival.setUTCHours(arrivalTime.getUTCHours());
+
+    nextArrival.setUTCMinutes(arrivalTime.getUTCMinutes() + timeToTravel.getUTCMinutes());
+
+    console.log(nextArrival.getUTCHours());
+
+    console.log(nextArrival.getUTCMinutes());
+
+    return nextArrival;
+}
+
 
