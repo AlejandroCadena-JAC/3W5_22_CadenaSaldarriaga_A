@@ -120,7 +120,10 @@ async function getStartAndEndStation()
             const newDepartureTimeArray = newDepartureTime.split(':');
 
             let newDepartureDate = new Date();
-        
+            if(newDepartureTimeArray[1].value < 10)
+            {
+                newDepartureTimeArray[1] = String(newDepartureTimeArray[1]).padStart(2, '0');
+            }
             newDepartureDate.setUTCHours(newDepartureTimeArray[0]);
             newDepartureDate.setUTCMinutes(newDepartureTimeArray[1]);
 
@@ -194,6 +197,11 @@ async function getSchedule(stations,newStationName, time,)
     let timeHolder = [];    
     let splits = time.split(":");
 
+    if(splits[1].value < 10)
+    {
+        splits[1] = String(splits[1]).padStart(2, '0');
+    }
+
     timeHolder.push(splits[0] + splits[1]);
 
     for(let dep =0; dep <filteredSchedules.length; dep++){
@@ -230,6 +238,11 @@ async function GetArrival(timeToTravel,arrivalTime)
 
     nextArrival.setUTCMinutes(arrivalTime.getUTCMinutes() + timeToTravel.getUTCMinutes());
 
+
+    if(nextArrival.getUTCMinutes() < 10)
+    {
+        nextArrival.setUTCMinutes(String(nextArrival.getUTCMinutes()).padStart(2, '0'));
+    }
     console.log(nextArrival.getUTCHours());
 
     console.log(nextArrival.getUTCMinutes());
