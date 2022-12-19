@@ -4,6 +4,7 @@
 
 const getStartStations = document.getElementById("beginSt");
 const getEndStations = document.getElementById("endSt");
+const getStationInfo = document.getElementById("infoSt");
 
 const getStations = async () => 
 {
@@ -23,15 +24,19 @@ const createOptions = async () =>
     {
         const newStationOption = document.createElement("option");
         const newEndStationOption = document.createElement("option");
+        const stationInfoOption = document.createElement("option");
         
 
         newStationOption.value = option.StationId;
         newStationOption.text = option.Name;
         newEndStationOption.value = option.StationId;
         newEndStationOption.text = option.Name;
-        
+        stationInfoOption.value = option.StationId
+        stationInfoOption.text = option.Name;
+
         getStartStations.appendChild(newStationOption); 
         getEndStations.appendChild(newEndStationOption);
+        getStationInfo.appendChild(stationInfoOption);
     }
 
    
@@ -58,6 +63,11 @@ async function getStartAndEndStation()
     var startValue = start.options[start.selectedIndex].text;
 
     var endValue = end.options[end.selectedIndex].text;
+
+    if (startValue === endValue){
+        window.alert("Are you trying to take the train to the same station you left from bucko?");
+        return 0;
+    }
 
     let completePath = "http://10.101.0.12:8080/path/" + encodeURIComponent(startValue) + "/" + encodeURIComponent(endValue);
 
@@ -90,71 +100,87 @@ async function getStartAndEndStation()
    {
         if(pathData[stationIndex].SegmentId != firstStationSegmentId || pathData[stationIndex].SegmentId != pathData[stationIndex].SegmentId)
         {
-            nextStationName = pathData[stationIndex + 1].Name;
-
-            currentStationName = pathData[stationIndex].Name;
-
-            let distancePath = "http://10.101.0.12:8080/distance/" + encodeURIComponent(currentStationName) + "/" + encodeURIComponent(nextStationName);
-
-            let totalDist = await getInfo(distancePath); 
-
-            let speedo = await getInfo("http://10.101.0.12:8080/averageTrainSpeed");
-                
-            let totalSpeed = speedo[0].AverageSpeed;
-
-            let timeToTravel = (totalDist / totalSpeed) * 60;
-
-            let UTCTimeTraveled = new Date();
-
-            UTCTimeTraveled.setUTCMinutes(timeToTravel);
-
-            let currentStationArrivalTime = await GetArrival(UTCTimeTraveled,previousArrivalTime);
-
-            previousArrivalTime = currentStationArrivalTime;
-
-            let currentStationArrivalTimeString = currentStationArrivalTime.getUTCHours() + ":" + currentStationArrivalTime.getUTCMinutes();
-
-            let departureFromSwitch = await getSchedule(pathData,currentStationName,currentStationArrivalTimeString);
-
-            let newDepartureTime = await addStr(departureFromSwitch,2,":");
-            const newDepartureTimeArray = newDepartureTime.split(':');
-
-            let newDepartureDate = new Date();
-            if(newDepartureTimeArray[1].value < 10)
+            if(typeof(pathData[stationIndex + 1]) != "undefined")
             {
-                newDepartureTimeArray[1] = String(newDepartureTimeArray[1]).padStart(2, '0');
-            }
-            newDepartureDate.setUTCHours(newDepartureTimeArray[0]);
-            newDepartureDate.setUTCMinutes(newDepartureTimeArray[1]);
+                firstStationSegmentId = pathData[stationIndex].SegmentId;
+                nextStationName = pathData[stationIndex + 1].Name;
 
-            createTable(nextStationName,newDepartureDate.getUTCHours() + ":" + newDepartureDate.getUTCMinutes());
+                currentStationName = pathData[stationIndex].Name;
+
+                let distancePath = "http://10.101.0.12:8080/distance/" + encodeURIComponent(currentStationName) + "/" + encodeURIComponent(nextStationName);
+
+                let totalDist = await getInfo(distancePath); 
+
+                let speedo = await getInfo("http://10.101.0.12:8080/averageTrainSpeed");
+                    
+                let totalSpeed = speedo[0].AverageSpeed;
+
+                let timeToTravel = (totalDist / totalSpeed) * 60;
+
+                let UTCTimeTraveled = new Date();
+
+                UTCTimeTraveled.setUTCMinutes(timeToTravel);
+
+                let currentStationArrivalTime = await GetArrival(UTCTimeTraveled,previousArrivalTime);
+
+                previousArrivalTime = currentStationArrivalTime;
+
+                let currentStationArrivalTimeString = currentStationArrivalTime.getUTCHours() + ":" + currentStationArrivalTime.getUTCMinutes();
+
+                let departureFromSwitch = await getSchedule(pathData,currentStationName,currentStationArrivalTimeString);
+
+                let newDepartureTime = await addStr(departureFromSwitch,2,":");
+                const newDepartureTimeArray = newDepartureTime.split(':');
+
+                let newDepartureDate = new Date();
+                if(newDepartureTimeArray[1].value < 10)
+                {
+                    newDepartureTimeArray[1] = String(newDepartureTimeArray[1]).padStart(2, '0');
+                }
+                newDepartureDate.setUTCHours(newDepartureTimeArray[0]);
+                newDepartureDate.setUTCMinutes(newDepartureTimeArray[1]);
+
+                createTable(nextStationName,newDepartureDate.getUTCHours() + ":" + newDepartureDate.getUTCMinutes());
+                }
+                else
+                {
+                    break;
+                }
+            
         }
         else
         {
-            
-            nextStationName = pathData[stationIndex + 1].Name;
+            if(typeof(pathData[stationIndex + 1]) != "undefined")
+            {
+                nextStationName = pathData[stationIndex + 1].Name;
 
-            currentStationName = pathData[stationIndex].Name;
-
-            let distancePath = "http://10.101.0.12:8080/distance/" + encodeURIComponent(currentStationName) + "/" + encodeURIComponent(nextStationName);
-
-            let totalDist = await getInfo(distancePath); 
-
-            let speedo = await getInfo("http://10.101.0.12:8080/averageTrainSpeed");
-                
-            let totalSpeed = speedo[0].AverageSpeed;
-
-            let timeToTravel = (totalDist / totalSpeed) * 60;
-
-            let UTCTimeTraveled = new Date();
-
-            UTCTimeTraveled.setUTCMinutes(timeToTravel);
-
-            let currentStationArrivalTime = await GetArrival(UTCTimeTraveled,previousArrivalTime);
-
-            previousArrivalTime = currentStationArrivalTime;
-
-            createTable(nextStationName,currentStationArrivalTime.getUTCHours() + ":" + currentStationArrivalTime.getUTCMinutes());
+                currentStationName = pathData[stationIndex].Name;
+    
+                let distancePath = "http://10.101.0.12:8080/distance/" + encodeURIComponent(currentStationName) + "/" + encodeURIComponent(nextStationName);
+    
+                let totalDist = await getInfo(distancePath); 
+    
+                let speedo = await getInfo("http://10.101.0.12:8080/averageTrainSpeed");
+                    
+                let totalSpeed = speedo[0].AverageSpeed;
+    
+                let timeToTravel = (totalDist / totalSpeed) * 60;
+    
+                let UTCTimeTraveled = new Date();
+    
+                UTCTimeTraveled.setUTCMinutes(timeToTravel);
+    
+                let currentStationArrivalTime = await GetArrival(UTCTimeTraveled,previousArrivalTime);
+    
+                previousArrivalTime = currentStationArrivalTime;
+    
+                createTable(nextStationName,currentStationArrivalTime.getUTCHours() + ":" + currentStationArrivalTime.getUTCMinutes());
+            }
+            else
+            {
+                break;
+            }
+          
         }
    } 
 } 
@@ -197,9 +223,13 @@ async function getSchedule(stations,newStationName, time,)
     let timeHolder = [];    
     let splits = time.split(":");
 
-    if(splits[1].value < 10)
+    if(splits[1] < 10)
     {
         splits[1] = String(splits[1]).padStart(2, '0');
+    }
+    else if(splits[0]< 10)
+    {
+        splits[0] = addStr(splits[0],2,'0');
     }
 
     timeHolder.push(splits[0] + splits[1]);
@@ -251,3 +281,32 @@ async function GetArrival(timeToTravel,arrivalTime)
 }
 
 
+async function printInfo()
+{
+
+    var station = document.getElementById('infoSt');
+    var infoContainer = document.getElementById('infoText');
+
+    var staInfo = station.options[station.selectedIndex].value;
+
+    let infoPath = "http://10.101.0.12:8080/stations/" + encodeURIComponent(staInfo);
+    const info = await getInfo(infoPath);
+    console.log(info);
+   
+
+   
+    var par = document.createElement('p');
+    var par2 = document.createElement('p');
+    var par3 = document.createElement('p');
+    par.innerText = "Station Name:" + " "+ JSON.stringify(info[0].Name);
+    par2.innerText = "Station Postal Code:"  + " " + JSON.stringify(info[0].PostalCode);
+    par3.innerText = "Station Street Name:"  + " " + JSON.stringify(info[0].StreetName);
+
+    infoContainer.appendChild(par);
+    infoContainer.appendChild(par2);
+    infoContainer.appendChild(par3);
+   
+}
+var additionalInfo = document.getElementById('stationInfo');
+
+additionalInfo.addEventListener("click", printInfo)
