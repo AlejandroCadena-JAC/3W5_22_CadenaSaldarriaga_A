@@ -1,73 +1,91 @@
 <!DOCTYPE html>
 <html>
+    <head>
+        <link rel="stylesheet" href="./style.css">
+    </head>
     <style>
         table, th, td {
-          border:1px solid black;
+          border:1px solid white;
         }
         </style>
+    
     <script src="./remPlanner.js" defer></script>
     <body>
-        <h1>Welcome to scuffed REM app</h1>
-        <p>We hope you enjoy</p>
+        <div class="bg-img"></div>
+        <div class="content">
+            <div class="title">
+            <h1>Welcome to "Totally" Transit</h1>
+            <img class="logo" src="./imgs/TransitAppImg.png">
+            <h6>Please do not sue me, I will take no legal responsability</h6>
+            <p class="message">We hope you enjoy</p>
+            </div>
 
 
-        <div class="startMenu">
-            <label for="startStation">Starting Station</label>
-            <select name="stationStart" id="beginSt">
-                <option value="default">choose a station</option>
-                
-            </select>
+            <div class="flex-container">
+                <div class="startMenu">
+                    <label for="startStation">Starting Station</label>
+                    <select name="stationStart" id="beginSt">
+                        <option value="default">choose a station</option>
+                        
+                    </select>
+                    
+                </div>
+    
+                <br>
             
-        </div>
+                <div class="endMenu">
+                    <label for="endStation">Arrival Station</label>
+                    <select name="stationEnd" id="endSt">
+                        <option value="default">choose a station</option>
+                        
+                    </select>
+                    
+                </div>
+    
+                <br>
+    
+                <div class="item">
+                    <label for="departure">Choose when you want to depart</label>
+                    <input type="time" id="departure">
+                </div>
+                <br>
+                <div class="item">
+                    <button id="print">print stations</button>
+                </div>
+    
+                <br>
+    
+            
 
-        <br>
+            </div>
+
+            <br>
+            <div class="tableContainer">
+                <div>
+                    <table id="pathTable">
+                        <tr>
+                            <th>Station</th>
+                            <th>Arrival Time</th>
+                        </tr>
+                            
+                    </table>
+                </div>
+                <div class="infoMenu">
+                <label for="infoMenu">Station Info</label>
+                <select name="stationInfo" id="infoSt">
+                    <option value="default">choose a station</option>
+                    
+                </select>
+                
+            </div>
+            <br>
+                <div>
+                    <button id="stationInfo">More Info</button>
+                </div>
+            <div id="infoText"></div>
+            </div>
+            <br>
+        </div>
         
-        <div class="endMenu">
-            <label for="endStation">Arrival Station</label>
-            <select name="stationEnd" id="endSt">
-                <option value="default">choose a station</option>
-                
-            </select>
-            
-        </div>
-
-        <br>
-
-        <div>
-            <label for="departure">Choose when you want to depart</label>
-            <input type="time" id="departure">
-        </div>
-        <br>
-        <div>
-            <button id="print">print stations</button>
-        </div>
-
-        <br>
-
-        <div>
-            <table id="pathTable">
-                <tr>
-                    <th>Station</th>
-                    <th>Arrival Time</th>
-                </tr>
-                
-            </table>
-        </div>
-        <br>
-        <div class="infoMenu">
-            <label for="infoMenu">Station Info</label>
-            <select name="stationInfo" id="infoSt">
-                <option value="default">choose a station</option>
-                
-            </select>
-            
-        </div>
-        <br>
-        <div>
-            <button id="stationInfo">More Info</button>
-        </div>
-        <div id="infoText">
-            
-        </div>
     </body>
 </html>
